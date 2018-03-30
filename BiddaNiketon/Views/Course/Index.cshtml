@@ -1,0 +1,56 @@
+﻿@model IEnumerable<BiddaNiketon.Models.Course>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>কোর্স সমূহ</h2>
+
+<p>
+    @Html.ActionLink("নতুন তৈরি", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.CourseID)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Credits)
+        </th>
+        <th>
+            Department
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.CourseID)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Title)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Credits)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Department.Name)
+        </td>
+        <td>
+            @Html.ActionLink("সম্পাদন", "Edit", new { id = item.CourseID }) |
+            @Html.ActionLink("বিস্তারিত", "Details", new { id = item.CourseID }) |
+            @Html.ActionLink("মুছে ফেলা", "Delete", new { id = item.CourseID })
+        </td>
+    </tr>
+}
+
+</table>
+
+<br />
+@*Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index", new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))*@

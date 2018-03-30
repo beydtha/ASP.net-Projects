@@ -1,0 +1,28 @@
+﻿@model IEnumerable<BiddaNiketon.ViewModel.EnrollmentDateGroup>
+
+
+@{
+    ViewBag.Title = "ছাত্র পরিসংখ্যান";
+}
+<h2>ছাত্র পরিসংখ্যান</h2>
+<table>
+    <tr>
+        <th width="200px">
+            তালিকাভুক্তি দিন
+        </th>
+        <th width="200px"></th>
+        <th width="200px">
+            ছাত্র সংখ্যা
+        </th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td width="200px">   @Html.DisplayFor(modelItem => item.EnrollmentDate)  </td>
+            <td width="200px"></td>
+            <td width="200px"> @item.StudentCount</td>
+        </tr>
+    }
+
+    </table>
+
