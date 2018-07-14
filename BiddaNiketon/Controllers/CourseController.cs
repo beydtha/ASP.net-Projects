@@ -15,11 +15,13 @@ namespace BiddaNiketon.Controllers
     public class CourseController : Controller
     {
         private SchoolContext db = new SchoolContext();
+        private UnitOfWork unitOfWork = new UnitOfWork(); 
 
         // GET: /Course/
         public ActionResult Index()
         {
-            var courses = db.Courses.Include(c => c.Department);
+            
+            var courses = unitOfWork.CourseRepository.Get(includeProperties: "Department");
             return View(courses.ToList());
         }
 
@@ -31,7 +33,7 @@ namespace BiddaNiketon.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Course course = db.Courses.Find(id);
+            Course course = unitOfWork.CourseRepository.GetByID(id);                                       
             if (course == null)
             {
                 return HttpNotFound();
@@ -58,8 +60,8 @@ namespace BiddaNiketon.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    db.Courses.Add(course);
-                    db.SaveChanges();
+                    unitOfWork.CourseRepository.Insert(course);// db.Courses.Add(course);
+                    unitOfWork.Save(); //db.SaveChanges();
                     return RedirectToAction("Index");
                 }
             }
@@ -119,9 +121,12 @@ namespace BiddaNiketon.Controllers
 
         private void PopulateDepartmentsDropDownList(object selectedDepartment = null)
         {
-            var departmentsQuery = from d in db.Departments
-                                   orderby d.Name
-                                   select d;
+            //var departmentsQuery = from d in db.Departments
+            //                       orderby d.Name
+            //                       select d;
+            var departmentsQuery = unitOfWork.CourseRepository.Get( 
+                orderBy: x => x.OrderBy( n => n.Title));
+
             ViewBag.DepartmentID = new SelectList(departmentsQuery, "DepartmentID", "Name", selectedDepartment);
         }
 

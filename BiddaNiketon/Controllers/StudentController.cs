@@ -12,7 +12,7 @@ namespace BiddaNiketon.Controllers
     public class StudentController : Controller
     {
         private SchoolContext db = new SchoolContext();
-
+        private UnitOfWork unitOfWork = new UnitOfWork(); 
         // GET: /Student/
         public ActionResult Index(string sortOrder,string currentFilter,  string searchString, int? page)
         {
@@ -26,8 +26,9 @@ namespace BiddaNiketon.Controllers
             else
                 searchString = currentFilter;
 
-            ViewBag.CurrentFilter = searchString; 
-            var students = from s in db.Students select s; 
+            ViewBag.CurrentFilter = searchString;
+            // var students = from s in db.Students select s; 
+            var students = unitOfWork.StudentRepository.Get();
             if(!String.IsNullOrEmpty(searchString))
             {
                 students = students.Where(x => x.FirstMidName.Contains(searchString) || x.LastName.Contains(searchString)); 
@@ -62,7 +63,9 @@ namespace BiddaNiketon.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Student student = db.Students.Find(id);
+            //Student student = db.Students.Find(id);
+            Student student = unitOfWork.StudentRepository.GetByID(id); 
+
             if (student == null)
             {
                 return HttpNotFound();
@@ -87,8 +90,8 @@ namespace BiddaNiketon.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    db.Students.Add(student);
-                    db.SaveChanges();
+                    unitOfWork.StudentRepository.Insert(student);
+                    unitOfWork.Save();
                     return RedirectToAction("Index");
                 }
             }
@@ -108,7 +111,7 @@ namespace BiddaNiketon.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Student student = db.Students.Find(id);
+            Student student = unitOfWork.StudentRepository.GetByID(id); // db.Students.Find(id);
             if (student == null)
             {
                 return HttpNotFound();
@@ -126,12 +129,17 @@ namespace BiddaNiketon.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var studentToUpdate = db.Students.Find(id);
+            var studentToUpdate = unitOfWork.StudentRepository.GetByID(id);// db.Students.Find(id);
             if(TryUpdateModel(studentToUpdate, "", new string[]{"LastName", "FirstMIdName", "EnrollmentDate"}))
             {
                 try
                 {
-                    db.SaveChanges();
+                    if(ModelState.IsValid)
+                    {
+                        unitOfWork.StudentRepository.Update(studentToUpdate);
+                        unitOfWork.Save();
+                    }
+                   // db.SaveChanges();
                     return RedirectToAction("Index");
                 }
                 catch(DataException /* DEX*/)
@@ -153,7 +161,7 @@ namespace BiddaNiketon.Controllers
             {
                 ViewBag.ErrorMessage = "Delete Failed. Try again and if the problem persist, talk your system adminitrator"; 
             }
-            Student student = db.Students.Find(id);
+            Student student = unitOfWork.StudentRepository.GetByID(id);// db.Students.Find(id);
             if (student == null)
             {
                 return HttpNotFound();
@@ -169,9 +177,9 @@ namespace BiddaNiketon.Controllers
         {
             try
             {
-                Student student = db.Students.Find(id);
-                db.Students.Remove(student);
-                db.SaveChanges();
+                Student student = unitOfWork.StudentRepository.GetByID(id);
+                unitOfWork.StudentRepository.Delete(id);
+                unitOfWork.Save();
                 return RedirectToAction("Index"); 
 
             }
@@ -187,7 +195,7 @@ namespace BiddaNiketon.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+               unitOfWork.Dispose();
             }
             base.Dispose(disposing);
         }
